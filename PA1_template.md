@@ -21,9 +21,6 @@ data <- read.csv("activity.csv", header=TRUE, nrows=17568, stringsAsFactors=FALS
 ```r
 library(lubridate)
 data$date <- ymd(data$date)
-#data$time <- formatC(data$interval, width=4, format="d", flag="0")
-#data$time <- paste0(substr(data$time,1,2), ":", substr(data$time,3,4))
-#data$time <- hm(data$time)
 ```
 
 Show some data!
@@ -61,8 +58,6 @@ medianTotalSteps <- median(dailySteps$TotalSteps, na.rm=TRUE)
 
 The mean total number of steps taken per day is **9354**; the median total number of steps taken per day is **1.0395 &times; 10<sup>4</sup>**.  We show zero decimal places here as the raw data has zero decimal places, meaning zero significant digits!
 
-
-
 ## What is the average daily activity pattern?
 Build a new data frame from *data* that calculates the average daily activity pattern, and call it *dailyActivity*:
 
@@ -81,7 +76,7 @@ head(dailyActivity,3)
 ```
 
 1. Let's create a time series plot of the mean steps:
-![plot of chunk unnamed-chunk-8](./PA1_template_files/figure-html/unnamed-chunk-8.png) 
+![plot of chunk unnamed-chunk-7](./PA1_template_files/figure-html/unnamed-chunk-7.png) 
 
 
 ```r
@@ -140,7 +135,7 @@ class(cleanData$steps) <- "numeric"
 ```
 
 4. Now let's re-build the histogram, and calculate the mean/median values to compare with our previous values.
-![plot of chunk unnamed-chunk-13](./PA1_template_files/figure-html/unnamed-chunk-13.png) 
+![plot of chunk unnamed-chunk-12](./PA1_template_files/figure-html/unnamed-chunk-12.png) 
 
 The shapes of the histograms are similar; however, the values are doubled if not more!
 
@@ -155,3 +150,37 @@ Now let's see how our cleaning of the data affected the mean and median values.
 Our approach to cleaning the data has nearly tripled the mean/median number of steps taken per day!  Was this the best approach to take?  How could it be improved?  These are important questions for future work.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+1. Create a new factor variable indicating whether the record is a *weekday* (Monday-Friday), or a *weekend day* (Saturday-Sunday).  We will also split the data frame into two separate data frames: one for weekday data, and another for weekend data.
+
+
+```r
+dayOfWeek <- weekdays(cleanData$date)
+dayOfWeek <- sapply(dayOfWeek,
+                   FUN=function(x) {
+                       if(is.element(x, c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")))
+                           as.factor("Weekday")
+                       else as.factor("Weekend")
+                       })
+cleanData$weekday <- dayOfWeek
+
+## split cleanData dataframe into weekday and weekend data frames - and calc averages for each interval
+weekdayData <- cleanData$weekday == "Weekday"
+weekendData <- cleanData$weekday == "Weekend"
+weekdayData <- cleanData[weekdayData,]
+weekendData <- cleanData[weekendData,]
+weekdayActivity <- aggregate(x=weekdayData$steps, by=list(weekdayData$interval), FUN=mean)
+names(weekdayActivity) <- c("interval", "MeanSteps")
+weekendActivity <- aggregate(x=weekendData$steps, by=list(weekendData$interval), FUN=mean)
+names(weekendActivity) <- c("interval", "MeanSteps")
+
+head(cleanData,3)
+```
+
+```
+##         date interval steps weekday
+## 1 2012-10-01        0    39 Weekday
+## 2 2012-10-01        5    13 Weekday
+## 3 2012-10-01       10     5 Weekday
+```
+2. Here is a panel plot showing the difference for the average number of steps taken throughout the day if it is a weekday, or a weekend day.
+![plot of chunk unnamed-chunk-15](./PA1_template_files/figure-html/unnamed-chunk-15.png) 
