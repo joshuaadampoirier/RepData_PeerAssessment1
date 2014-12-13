@@ -79,7 +79,8 @@ data$date &lt;- ymd(data$date)
 <div id="what-is-mean-total-number-of-steps-taken-per-day" class="section level2">
 <h2>What is mean total number of steps taken per day?</h2>
 <p>Build a new data frame from <em>data</em> that calculates the total number of steps taken on each day:</p>
-<pre class="r"><code>dailySteps &lt;- aggregate(x=data$steps, by=list(data$date), FUN=sum, na.rm=TRUE)
+<pre class="r"><code>## aggregate data on 'date' field, summing the steps for each day
+dailySteps &lt;- aggregate(x=data$steps, by=list(data$date), FUN=sum, na.rm=TRUE)
 names(dailySteps) &lt;- c(&quot;Date&quot;, &quot;TotalSteps&quot;)
 meanTotalSteps &lt;- mean(dailySteps$TotalSteps)
 head(dailySteps,3)</code></pre>
@@ -91,11 +92,12 @@ head(dailySteps,3)</code></pre>
 </div>
 <div id="what-is-the-average-daily-activity-pattern" class="section level2">
 <h2>What is the average daily activity pattern?</h2>
-<p>Build a new data frame from <em>data</em> that calculates the average daily activity pattern:</p>
-<pre class="r"><code>dailyActivity &lt;- aggregate(x=data$steps, by=list(data$interval), FUN=mean, na.rm=TRUE)
-names(dailyActivity) &lt;- c(&quot;Interval&quot;, &quot;MeanSteps&quot;)
+<p>Build a new data frame from <em>data</em> that calculates the average daily activity pattern, and call it <em>dailyActivity</em>:</p>
+<pre class="r"><code>## aggregate data on 'interval' field, finding the average steps taken for each interval
+dailyActivity &lt;- aggregate(x=data$steps, by=list(data$interval), FUN=mean, na.rm=TRUE)
+names(dailyActivity) &lt;- c(&quot;interval&quot;, &quot;MeanSteps&quot;)
 head(dailyActivity,3)</code></pre>
-<pre><code>##   Interval MeanSteps
+<pre><code>##   interval MeanSteps
 ## 1        0    1.7170
 ## 2        5    0.3396
 ## 3       10    0.1321</code></pre>
@@ -103,6 +105,25 @@ head(dailyActivity,3)</code></pre>
 </div>
 <div id="imputing-missing-values" class="section level2">
 <h2>Imputing missing values</h2>
+<p>In the previous step, we computed the average number of steps taken for each interval. To impute missing values, let’s insert the value from the <em>dailyActivity</em> data frame for the corresponding interval.</p>
+<pre class="r"><code>library(dplyr)
+## import average daily activity data frame into main data frame (linking on 'interval' field),
+## then impute values from average daily activity
+data &lt;- left_join(data, dailyActivity, by=&quot;interval&quot;)
+data$stepsClean &lt;- apply(data,1,FUN=function(x) {if(is.na(x[1])) x[4] else x[1]})
+print(data[2303:2311,])</code></pre>
+<pre><code>##      steps       date interval MeanSteps stepsClean
+## 2303    NA 2012-10-08     2350   0.22642    0.22642
+## 2304    NA 2012-10-08     2355   1.07547    1.07547
+## 2305     0 2012-10-09        0   1.71698          0
+## 2306     0 2012-10-09        5   0.33962          0
+## 2307     0 2012-10-09       10   0.13208          0
+## 2308     0 2012-10-09       15   0.15094          0
+## 2309     0 2012-10-09       20   0.07547          0
+## 2310    13 2012-10-09       25   2.09434         13
+## 2311    28 2012-10-09       30   0.52830         28</code></pre>
+<p>Notice how the <em>stepsClean</em> field took the <em>steps</em> field if it was numeric, and took the <em>MeanSteps</em> field if the <em>steps</em> field was missing. Let’s also create a tidy analytic data frame for moving forward:</p>
+<pre class="r"><code>tidyData &lt;- data.frame(date=data$date, interval=data$interval, steps=data$stepsClean)</code></pre>
 </div>
 <div id="are-there-differences-in-activity-patterns-between-weekdays-and-weekends" class="section level2">
 <h2>Are there differences in activity patterns between weekdays and weekends?</h2>
