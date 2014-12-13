@@ -17,9 +17,21 @@ if (!file.exists("activity.csv")) {
 Load the data into a data frame called *data*:
 ``` {r}
 data <- read.csv("activity.csv", header=TRUE, nrows=17568, stringsAsFactors=FALSE)
-summary(data)
 ```
 
+Pre-process the data by formatting the *date* as a date object:
+``` {r}
+library(lubridate)
+data$date <- ymd(data$date)
+#data$time <- formatC(data$interval, width=4, format="d", flag="0")
+#data$time <- paste0(substr(data$time,1,2), ":", substr(data$time,3,4))
+#data$time <- hm(data$time)
+```
+
+Show some data!
+``` {r echo=FALSE}
+tail(data,3)
+```
 
 ## What is mean total number of steps taken per day?
 Build a new data frame from *data* that calculates the total number of steps taken on each day:
@@ -32,9 +44,28 @@ head(dailySteps,3)
 
 The mean total number of steps taken per day is **`r round(meanTotalSteps)`**.  We show zero decimal places here as the raw data has zero decimal places, meaning zero significant digits!
 
+``` {r echo=FALSE}
+# cleanup the memory - we no longer need this data frame
+rm(dailySteps)
+```
+
 ## What is the average daily activity pattern?
+Build a new data frame from *data* that calculates the average daily activity pattern:
+``` {r avgDailyActivity}
+dailyActivity <- aggregate(x=data$steps, by=list(data$interval), FUN=mean, na.rm=TRUE)
+names(dailyActivity) <- c("Interval", "MeanSteps")
+head(dailyActivity,3)
+```
 
-
+Let's create a time series plot of the mean steps:
+``` {r echo=FALSE}
+plot(dailyActivity$Interval, dailyActivity$MeanSteps, type="l", 
+     main="Average Daily Activity Pattern",
+     xlab="Interval (hhmm)",
+     ylab="Average Steps",
+     xaxt="n")
+axis(1, at=c(0,600,1200,1800,2400), labels=c("00:00", "06:00", "12:00", "18:00", "24:00"))
+```
 
 ## Imputing missing values
 

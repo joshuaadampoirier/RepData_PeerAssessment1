@@ -14,20 +14,26 @@ Load the data into a data frame called *data*:
 
 ```r
 data <- read.csv("activity.csv", header=TRUE, nrows=17568, stringsAsFactors=FALSE)
-summary(data)
 ```
 
-```
-##      steps           date              interval   
-##  Min.   :  0.0   Length:17568       Min.   :   0  
-##  1st Qu.:  0.0   Class :character   1st Qu.: 589  
-##  Median :  0.0   Mode  :character   Median :1178  
-##  Mean   : 37.4                      Mean   :1178  
-##  3rd Qu.: 12.0                      3rd Qu.:1766  
-##  Max.   :806.0                      Max.   :2355  
-##  NA's   :2304
+Pre-process the data by formatting the *date* as a date object:
+
+```r
+library(lubridate)
+data$date <- ymd(data$date)
+#data$time <- formatC(data$interval, width=4, format="d", flag="0")
+#data$time <- paste0(substr(data$time,1,2), ":", substr(data$time,3,4))
+#data$time <- hm(data$time)
 ```
 
+Show some data!
+
+```
+##       steps       date interval
+## 17566    NA 2012-11-30     2345
+## 17567    NA 2012-11-30     2350
+## 17568    NA 2012-11-30     2355
+```
 
 ## What is mean total number of steps taken per day?
 Build a new data frame from *data* that calculates the total number of steps taken on each day:
@@ -48,9 +54,26 @@ head(dailySteps,3)
 
 The mean total number of steps taken per day is **9354**.  We show zero decimal places here as the raw data has zero decimal places, meaning zero significant digits!
 
+
+
 ## What is the average daily activity pattern?
+Build a new data frame from *data* that calculates the average daily activity pattern:
 
+```r
+dailyActivity <- aggregate(x=data$steps, by=list(data$interval), FUN=mean, na.rm=TRUE)
+names(dailyActivity) <- c("Interval", "MeanSteps")
+head(dailyActivity,3)
+```
 
+```
+##   Interval MeanSteps
+## 1        0    1.7170
+## 2        5    0.3396
+## 3       10    0.1321
+```
+
+Let's create a time series plot of the mean steps:
+![plot of chunk unnamed-chunk-6](./PA1_template_files/figure-html/unnamed-chunk-6.png) 
 
 ## Imputing missing values
 
