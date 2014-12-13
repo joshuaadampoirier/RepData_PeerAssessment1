@@ -15,13 +15,13 @@ if (!file.exists("activity.csv")) {
 }
 ```
 
-1. Load the data into a data frame called *data*:
+Load the data into a data frame called *data*:
 
 ```r
 data <- read.csv("activity.csv", header=TRUE, nrows=17568, stringsAsFactors=FALSE)
 ```
 
-2. Pre-process the data by formatting the *date* as a date object:
+Pre-process the data by formatting the *date* as a date object:
 
 ```r
 library(lubridate)
@@ -38,7 +38,7 @@ Show some data!
 ```
 
 ## What is mean total number of steps taken per day?
-1. Build a new data frame from *data* that calculates the total number of steps taken on each day, and build a histogram:
+Build a new data frame from *data* that calculates the total number of steps taken on each day, and build a histogram:
 
 ```r
 ## aggregate data on 'date' field, summing the steps for each day
@@ -54,7 +54,7 @@ hist(dailySteps$TotalSteps,
 
 ![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5.png) 
 
-2. Let's calculate the **mean** and **median** total number of steps taken per day:
+Let's calculate the **mean** and **median** total number of steps taken per day:
 
 ```r
 meanTotalSteps <- mean(dailySteps$TotalSteps, na.rm=TRUE)
@@ -80,7 +80,7 @@ head(dailyActivity,3)
 ## 3       10    0.1321
 ```
 
-1. Let's create a time series plot of the mean steps:
+Let's create a time series plot of the mean steps:
 ![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7.png) 
 
 
@@ -92,10 +92,10 @@ maxStepsInterval <- formatC(maxStepsInterval, width=4, format="d", flag="0")
 maxStepsInterval <- paste0(substr(maxStepsInterval,1,2), ":", substr(maxStepsInterval,3,4))
 ```
 
-2. The average daily maximum number of steps taken per 5-minute interval is **206**, and is taken during **interval  8:35**.
+The average daily maximum number of steps taken per 5-minute interval is **206**, and is taken during **interval  8:35**.
 
 ## Imputing missing values
-1. Let us calculate the total number of missing values in the dataset!
+Let us calculate the total number of missing values in the dataset!
 
 ```r
 missingSteps <- sum(is.na(data$steps))
@@ -106,7 +106,7 @@ totalMissing <- missingSteps + missingIntervals + missingDates
 
 The total number of missing values in the dataset is **2304**.
 
-2. In the previous step, we computed the average number of steps taken for each interval.  Our strategy for imputing missing values will be to insert the value from the *dailyActivity* data frame for the corresponding interval.  
+In the previous step, we computed the average number of steps taken for each interval.  Our strategy for imputing missing values will be to insert the value from the *dailyActivity* data frame for the corresponding interval.  
 
 ```r
 library(dplyr)
@@ -132,14 +132,14 @@ print(data[2303:2311,])
 
 Notice how the *stepsClean* field took the *steps* field if it was numeric, and took the *MeanSteps* field if the *steps* field was missing.  
 
-3. Let's also create a clean analytic data frame for moving forward:
+Let's also create a clean analytic data frame for moving forward:
 
 ```r
 cleanData <- data.frame(date=data$date, interval=data$interval, steps=data$stepsClean)
 class(cleanData$steps) <- "numeric"
 ```
 
-4. Now let's re-build the histogram, and calculate the mean/median values to compare with our previous values.
+Now let's re-build the histogram, and calculate the mean/median values to compare with our previous values.
 ![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12.png) 
 
 The shapes of the histograms are similar; however, the values are doubled if not more!
@@ -155,7 +155,7 @@ Now let's see how our cleaning of the data affected the mean and median values.
 Our approach to cleaning the data has nearly tripled the mean/median number of steps taken per day!  Was this the best approach to take?  How could it be improved?  These are important questions for future work.
 
 ## Are there differences in activity patterns between weekdays and weekends?
-1. Create a new factor variable indicating whether the record is a *weekday* (Monday-Friday), or a *weekend day* (Saturday-Sunday).  We will also split the data frame into two separate data frames: one for weekday data, and another for weekend data.
+Create a new factor variable indicating whether the record is a *weekday* (Monday-Friday), or a *weekend day* (Saturday-Sunday).  We will also split the data frame into two separate data frames: one for weekday data, and another for weekend data.
 
 
 ```r
@@ -187,5 +187,5 @@ head(cleanData,3)
 ## 2 2012-10-01        5    13 Weekday
 ## 3 2012-10-01       10     5 Weekday
 ```
-2. Here is a panel plot showing the difference for the average number of steps taken throughout the day if it is a weekday, or a weekend day.
+Here is a panel plot showing the difference for the average number of steps taken throughout the day if it is a weekday, or a weekend day.
 ![plot of chunk unnamed-chunk-15](figure/unnamed-chunk-15.png) 
