@@ -14,12 +14,12 @@ if (!file.exists("activity.csv")) {
 }
 ```
 
-Load the data into a data frame called *data*:
+1. Load the data into a data frame called *data*:
 ``` {r}
 data <- read.csv("activity.csv", header=TRUE, nrows=17568, stringsAsFactors=FALSE)
 ```
 
-Pre-process the data by formatting the *date* as a date object:
+2. Pre-process the data by formatting the *date* as a date object:
 ``` {r}
 library(lubridate)
 data$date <- ymd(data$date)
@@ -34,20 +34,30 @@ tail(data,3)
 ```
 
 ## What is mean total number of steps taken per day?
-Build a new data frame from *data* that calculates the total number of steps taken on each day:
-``` {r meanTotalSteps}
+1. Build a new data frame from *data* that calculates the total number of steps taken on each day, and build a histogram:
+``` {r}
 ## aggregate data on 'date' field, summing the steps for each day
 dailySteps <- aggregate(x=data$steps, by=list(data$date), FUN=sum, na.rm=TRUE)
 names(dailySteps) <- c("Date", "TotalSteps")
-meanTotalSteps <- mean(dailySteps$TotalSteps)
-head(dailySteps,3)
+
+## build histogram
+hist(dailySteps$TotalSteps, 
+     main="Histogram of Raw Total # of Steps Taken Each Day",
+     xlab="# Steps Taken Per Day",
+     breaks=10)
 ```
 
-The mean total number of steps taken per day is **`r round(meanTotalSteps)`**.  We show zero decimal places here as the raw data has zero decimal places, meaning zero significant digits!
+2. Let's calculate the **mean** and **median** total number of steps taken per day:
+``` {r}
+meanTotalSteps <- mean(dailySteps$TotalSteps, na.rm=TRUE)
+medianTotalSteps <- median(dailySteps$TotalSteps, na.rm=TRUE)
+```
+
+The mean total number of steps taken per day is **`r round(meanTotalSteps)`**; the median total number of steps taken per day is **`r round(medianTotalSteps)`**.  We show zero decimal places here as the raw data has zero decimal places, meaning zero significant digits!
 
 ``` {r echo=FALSE}
 # cleanup the memory - we no longer need this data frame
-rm(dailySteps)
+#rm(dailySteps)
 ```
 
 ## What is the average daily activity pattern?
@@ -59,19 +69,39 @@ names(dailyActivity) <- c("interval", "MeanSteps")
 head(dailyActivity,3)
 ```
 
-Let's create a time series plot of the mean steps:
+1. Let's create a time series plot of the mean steps:
 ``` {r echo=FALSE}
 ## plot the average steps taken for each interval using default plotting system
 plot(dailyActivity$interval, dailyActivity$MeanSteps, type="l", 
      main="Average Daily Activity Pattern",
-     xlab="Interval (hhmm)",
+     xlab="Interval (hh:mm)",
      ylab="Average Steps",
      xaxt="n")
 axis(1, at=c(0,600,1200,1800,2400), labels=c("00:00", "06:00", "12:00", "18:00", "24:00"))
 ```
 
+``` {r results='hide'}
+rowMaxSteps <- which.max(dailyActivity$MeanSteps)
+maxSteps <- dailyActivity$MeanSteps[rowMaxSteps]
+maxStepsInterval <- toString(dailyActivity$interval[rowMaxSteps])
+maxStepsInterval <- formatC(maxStepsInterval, width=4, format="d", flag="0")
+maxStepsInterval <- paste0(substr(maxStepsInterval,1,2), ":", substr(maxStepsInterval,3,4))
+```
+
+2. The average daily maximum number of steps taken per 5-minute interval is **`r round(maxSteps)`**, and is taken during **interval `r maxStepsInterval`**.
+
 ## Imputing missing values
-In the previous step, we computed the average number of steps taken for each interval.  To impute missing values, let's insert the value from the *dailyActivity* data frame for the corresponding interval.  
+1. Let us calculate the total number of missing values in the dataset!
+``` {r}
+missingSteps <- sum(is.na(data$steps))
+missingIntervals <- sum(is.na(data$interval))
+missingDates <- sum(is.na(data$date))
+totalMissing <- missingSteps + missingIntervals + missingDates
+```
+
+The total number of missing values in the dataset is **`r totalMissing`**.
+
+2. In the previous step, we computed the average number of steps taken for each interval.  Our strategy for imputing missing values will be to insert the value from the *dailyActivity* data frame for the corresponding interval.  
 ``` {r message=FALSE}
 library(dplyr)
 ## import average daily activity data frame into main data frame (linking on 'interval' field),
@@ -81,9 +111,47 @@ data$stepsClean <- apply(data,1,FUN=function(x) {if(is.na(x[1])) x[4] else x[1]}
 print(data[2303:2311,])
 ```
 
-Notice how the *stepsClean* field took the *steps* field if it was numeric, and took the *MeanSteps* field if the *steps* field was missing.  Let's also create a tidy analytic data frame for moving forward:
+Notice how the *stepsClean* field took the *steps* field if it was numeric, and took the *MeanSteps* field if the *steps* field was missing.  
+
+3. Let's also create a clean analytic data frame for moving forward:
 ```{r results='hide'}
-tidyData <- data.frame(date=data$date, interval=data$interval, steps=data$stepsClean)
+cleanData <- data.frame(date=data$date, interval=data$interval, steps=data$stepsClean)
+class(cleanData$steps) <- "numeric"
 ```
+
+4. Now let's re-build the histogram, and calculate the mean/median values to compare with our previous values.
+``` {r echo=FALSE}
+## aggregate data on 'date' field, summing the steps for each day
+cleanDailySteps <- aggregate(x=cleanData$steps, by=list(cleanData$date), FUN=sum, na.rm=TRUE)
+names(cleanDailySteps) <- c("Date", "TotalSteps")
+
+## build histograms
+par(mfrow=c(1,2), mar=c(4,4,2,1))
+hist(dailySteps$TotalSteps, 
+     main="Raw Total Steps/Day",
+     xlab="# Steps Taken Per Day",
+     breaks=10)
+hist(cleanDailySteps$TotalSteps, 
+     main="Clean Total Steps/Day",
+     xlab="# Steps Taken Per Day",
+     breaks=10)
+```
+
+The shapes of the histograms are similar; however, the values are doubled if not more!
+
+Now let's see how our cleaning of the data affected the mean and median values.
+``` {r echo=FALSE}
+cleanMeanTotalSteps <- mean(cleanDailySteps$TotalSteps)
+cleanMedianTotalSteps <- median(cleanDailySteps$TotalSteps)
+
+diff <- matrix(c(meanTotalSteps, cleanMeanTotalSteps, medianTotalSteps, cleanMedianTotalSteps), 
+               nrow=2, ncol=2, byrow=TRUE)
+diff <- as.data.frame(diff)
+names(diff) <- c("Raw", "Clean")
+row.names(diff) <- c("Mean", "Median")
+print(diff)
+```
+
+Our approach to cleaning the data has nearly tripled the mean/median number of steps taken per day!  Was this the best approach to take?  How could it be improved?  These are important questions for future work.
 
 ## Are there differences in activity patterns between weekdays and weekends?
