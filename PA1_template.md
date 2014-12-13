@@ -1,4 +1,9 @@
-# Reproducible Research: Peer Assessment 1
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+---
 Joshua Poirier
 
 ## Loading and preprocessing the data
@@ -47,7 +52,7 @@ hist(dailySteps$TotalSteps,
      breaks=10)
 ```
 
-![plot of chunk unnamed-chunk-5](./PA1_template_files/figure-html/unnamed-chunk-5.png) 
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5.png) 
 
 2. Let's calculate the **mean** and **median** total number of steps taken per day:
 
@@ -76,7 +81,7 @@ head(dailyActivity,3)
 ```
 
 1. Let's create a time series plot of the mean steps:
-![plot of chunk unnamed-chunk-7](./PA1_template_files/figure-html/unnamed-chunk-7.png) 
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7.png) 
 
 
 ```r
@@ -135,7 +140,7 @@ class(cleanData$steps) <- "numeric"
 ```
 
 4. Now let's re-build the histogram, and calculate the mean/median values to compare with our previous values.
-![plot of chunk unnamed-chunk-12](./PA1_template_files/figure-html/unnamed-chunk-12.png) 
+![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12.png) 
 
 The shapes of the histograms are similar; however, the values are doubled if not more!
 
@@ -183,4 +188,4 @@ head(cleanData,3)
 ## 3 2012-10-01       10     5 Weekday
 ```
 2. Here is a panel plot showing the difference for the average number of steps taken throughout the day if it is a weekday, or a weekend day.
-![plot of chunk unnamed-chunk-15](./PA1_template_files/figure-html/unnamed-chunk-15.png) 
+![plot of chunk unnamed-chunk-15](figure/unnamed-chunk-15.png) 
