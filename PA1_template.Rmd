@@ -16,14 +16,21 @@ if (!file.exists("activity.csv")) {
 
 Load the data into a data frame called *data*:
 ``` {r}
-data <- read.csv("activity.csv", header=TRUE, nrows=17568)
+data <- read.csv("activity.csv", header=TRUE, nrows=17568, stringsAsFactors=FALSE)
 summary(data)
 ```
 
 
 ## What is mean total number of steps taken per day?
+Build a new data frame from *data* that calculates the total number of steps taken on each day:
+``` {r meanTotalSteps}
+dailySteps <- aggregate(x=data$steps, by=list(data$date), FUN=sum, na.rm=TRUE)
+names(dailySteps) <- c("Date", "TotalSteps")
+meanTotalSteps <- mean(dailySteps$TotalSteps)
+head(dailySteps,3)
+```
 
-
+The mean total number of steps taken per day is **`r round(meanTotalSteps)`**.  We show zero decimal places here as the raw data has zero decimal places, meaning zero significant digits!
 
 ## What is the average daily activity pattern?
 

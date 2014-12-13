@@ -63,19 +63,29 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
     unzip(&quot;activity.zip&quot;)
 }</code></pre>
 <p>Load the data into a data frame called <em>data</em>:</p>
-<pre class="r"><code>data &lt;- read.csv(&quot;activity.csv&quot;, header=TRUE, nrows=17568)
+<pre class="r"><code>data &lt;- read.csv(&quot;activity.csv&quot;, header=TRUE, nrows=17568, stringsAsFactors=FALSE)
 summary(data)</code></pre>
-<pre><code>##      steps               date          interval   
-##  Min.   :  0.0   2012-10-01:  288   Min.   :   0  
-##  1st Qu.:  0.0   2012-10-02:  288   1st Qu.: 589  
-##  Median :  0.0   2012-10-03:  288   Median :1178  
-##  Mean   : 37.4   2012-10-04:  288   Mean   :1178  
-##  3rd Qu.: 12.0   2012-10-05:  288   3rd Qu.:1766  
-##  Max.   :806.0   2012-10-06:  288   Max.   :2355  
-##  NA's   :2304    (Other)   :15840</code></pre>
+<pre><code>##      steps           date              interval   
+##  Min.   :  0.0   Length:17568       Min.   :   0  
+##  1st Qu.:  0.0   Class :character   1st Qu.: 589  
+##  Median :  0.0   Mode  :character   Median :1178  
+##  Mean   : 37.4                      Mean   :1178  
+##  3rd Qu.: 12.0                      3rd Qu.:1766  
+##  Max.   :806.0                      Max.   :2355  
+##  NA's   :2304</code></pre>
 </div>
 <div id="what-is-mean-total-number-of-steps-taken-per-day" class="section level2">
 <h2>What is mean total number of steps taken per day?</h2>
+<p>Build a new data frame from <em>data</em> that calculates the total number of steps taken on each day:</p>
+<pre class="r"><code>dailySteps &lt;- aggregate(x=data$steps, by=list(data$date), FUN=sum, na.rm=TRUE)
+names(dailySteps) &lt;- c(&quot;Date&quot;, &quot;TotalSteps&quot;)
+meanTotalSteps &lt;- mean(dailySteps$TotalSteps)
+head(dailySteps,3)</code></pre>
+<pre><code>##         Date TotalSteps
+## 1 2012-10-01          0
+## 2 2012-10-02        126
+## 3 2012-10-03      11352</code></pre>
+<p>The mean total number of steps taken per day is <strong>9354</strong>. We show zero decimal places here as the raw data has zero decimal places, meaning zero significant digits!</p>
 </div>
 <div id="what-is-the-average-daily-activity-pattern" class="section level2">
 <h2>What is the average daily activity pattern?</h2>
