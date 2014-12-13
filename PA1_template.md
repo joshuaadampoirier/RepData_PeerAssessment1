@@ -30,6 +30,10 @@ data$date <- ymd(data$date)
 
 Show some data!
 
+```r
+tail(data,3)
+```
+
 ```
 ##       steps       date interval
 ## 17566    NA 2012-11-30     2345
@@ -81,6 +85,17 @@ head(dailyActivity,3)
 ```
 
 Let's create a time series plot of the mean steps:
+
+```r
+## plot the average steps taken for each interval using default plotting system
+plot(dailyActivity$interval, dailyActivity$MeanSteps, type="l", 
+     main="Average Daily Activity Pattern",
+     xlab="Interval (hh:mm)",
+     ylab="Average Steps",
+     xaxt="n")
+axis(1, at=c(0,600,1200,1800,2400), labels=c("00:00", "06:00", "12:00", "18:00", "24:00"))
+```
+
 ![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7.png) 
 
 
@@ -140,11 +155,41 @@ class(cleanData$steps) <- "numeric"
 ```
 
 Now let's re-build the histogram, and calculate the mean/median values to compare with our previous values.
+
+```r
+## aggregate data on 'date' field, summing the steps for each day
+cleanDailySteps <- aggregate(x=cleanData$steps, by=list(cleanData$date), FUN=sum, na.rm=TRUE)
+names(cleanDailySteps) <- c("Date", "TotalSteps")
+
+## build histograms
+par(mfrow=c(1,2), mar=c(4,4,2,1))
+hist(dailySteps$TotalSteps, 
+     main="Raw Total Steps/Day",
+     xlab="# Steps Taken Per Day",
+     breaks=10)
+hist(cleanDailySteps$TotalSteps, 
+     main="Clean Total Steps/Day",
+     xlab="# Steps Taken Per Day",
+     breaks=10)
+```
+
 ![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12.png) 
 
 The shapes of the histograms are similar; however, the values are doubled if not more!
 
 Now let's see how our cleaning of the data affected the mean and median values.
+
+```r
+cleanMeanTotalSteps <- mean(cleanDailySteps$TotalSteps)
+cleanMedianTotalSteps <- median(cleanDailySteps$TotalSteps)
+
+diff <- matrix(c(meanTotalSteps, cleanMeanTotalSteps, medianTotalSteps, cleanMedianTotalSteps), 
+               nrow=2, ncol=2, byrow=TRUE)
+diff <- as.data.frame(diff)
+names(diff) <- c("Raw", "Clean")
+row.names(diff) <- c("Mean", "Median")
+print(diff)
+```
 
 ```
 ##          Raw Clean
@@ -188,4 +233,21 @@ head(cleanData,3)
 ## 3 2012-10-01       10     5 Weekday
 ```
 Here is a panel plot showing the difference for the average number of steps taken throughout the day if it is a weekday, or a weekend day.
+
+```r
+par(mfrow=c(2,1), mar=c(4,4,2,1))
+plot(weekdayActivity$interval, weekdayActivity$MeanSteps, type="l", 
+     main="Average Weekday Activity Pattern",
+     xlab="Interval (hh:mm)",
+     ylab="Average Steps",
+     xaxt="n")
+axis(1, at=c(0,600,1200,1800,2400), labels=c("00:00", "06:00", "12:00", "18:00", "24:00"))
+plot(weekendActivity$interval, weekendActivity$MeanSteps, type="l", 
+     main="Average Weekend Activity Pattern",
+     xlab="Interval (hh:mm)",
+     ylab="Average Steps",
+     xaxt="n")
+axis(1, at=c(0,600,1200,1800,2400), labels=c("00:00", "06:00", "12:00", "18:00", "24:00"))
+```
+
 ![plot of chunk unnamed-chunk-15](figure/unnamed-chunk-15.png) 

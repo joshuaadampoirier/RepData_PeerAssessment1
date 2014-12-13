@@ -26,7 +26,7 @@ data$date <- ymd(data$date)
 ```
 
 Show some data!
-``` {r echo=FALSE}
+``` {r}
 tail(data,3)
 ```
 
@@ -62,7 +62,7 @@ head(dailyActivity,3)
 ```
 
 Let's create a time series plot of the mean steps:
-``` {r echo=FALSE}
+``` {r}
 ## plot the average steps taken for each interval using default plotting system
 plot(dailyActivity$interval, dailyActivity$MeanSteps, type="l", 
      main="Average Daily Activity Pattern",
@@ -112,7 +112,7 @@ class(cleanData$steps) <- "numeric"
 ```
 
 Now let's re-build the histogram, and calculate the mean/median values to compare with our previous values.
-``` {r echo=FALSE}
+``` {r}
 ## aggregate data on 'date' field, summing the steps for each day
 cleanDailySteps <- aggregate(x=cleanData$steps, by=list(cleanData$date), FUN=sum, na.rm=TRUE)
 names(cleanDailySteps) <- c("Date", "TotalSteps")
@@ -132,7 +132,7 @@ hist(cleanDailySteps$TotalSteps,
 The shapes of the histograms are similar; however, the values are doubled if not more!
 
 Now let's see how our cleaning of the data affected the mean and median values.
-``` {r echo=FALSE}
+``` {r}
 cleanMeanTotalSteps <- mean(cleanDailySteps$TotalSteps)
 cleanMedianTotalSteps <- median(cleanDailySteps$TotalSteps)
 
@@ -172,7 +172,7 @@ names(weekendActivity) <- c("interval", "MeanSteps")
 head(cleanData,3)
 ```
 Here is a panel plot showing the difference for the average number of steps taken throughout the day if it is a weekday, or a weekend day.
-``` {r echo=FALSE}
+``` {r}
 par(mfrow=c(2,1), mar=c(4,4,2,1))
 plot(weekdayActivity$interval, weekdayActivity$MeanSteps, type="l", 
      main="Average Weekday Activity Pattern",
